@@ -25,6 +25,7 @@ Optional:
 
 ```
 NEXT_PUBLIC_EVENT_SLUG=   # default: barcelona-pub-golf
+PUBGOLF_TEAMS_CLEAR_SECRET=   # long random string; enables POST /api/admin/clear-teams (Bearer). Unset after use.
 ```
 
 ## Architecture
@@ -44,6 +45,7 @@ NEXT_PUBLIC_EVENT_SLUG=   # default: barcelona-pub-golf
 |---|---|---|---|
 | `/api/events/[slug]/teams` | POST | none (open add-team; slug must match `SINGLE_EVENT_SLUG`) | Add team |
 | `/api/teams/[teamId]/scores` | PATCH | `playerToken` in body | Player updates their column |
+| `/api/admin/clear-teams` | POST | `Authorization: Bearer` + `PUBGOLF_TEAMS_CLEAR_SECRET` | Delete all teams (same DB as deployment; remove secret after use) |
 
 ### Scoring logic (`src/lib/scoring.ts`)
 
