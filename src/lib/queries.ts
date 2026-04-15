@@ -3,6 +3,11 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Course } from "@/lib/course";
 import { DEFAULT_BARCELONA_COURSE } from "@/lib/course";
+import {
+  SINGLE_EVENT_SLUG,
+  SINGLE_EVENT_TITLE,
+  UNUSED_ORGANIZER_KEY_HASH,
+} from "@/lib/singleEvent";
 import type { PenaltiesJson, ScoresJson } from "@/lib/scoring";
 
 export type EventRow = {
@@ -104,4 +109,25 @@ export async function getEventForTeam(team: TeamRow): Promise<EventRow | null> {
     ...data,
     course: parseCourse(data.course),
   } as EventRow;
+}
+
+/** Idempotent: inserts the single Barcelona event row if missing (no organizer key). */
+export async function ensureSingleEvent(): Promise<void> {
+  const existing = await getEventBySlug(SINGLE_EVENT_SLUG);
+  if (existing) return;
+
+  const supabase = createAdminClient();
+  const { error } = await supabase.from("events").insert({
+    slug: SINGLE_EVENT_SLUG,
+    title: SINGLE_EVENT_TITLE,
+    organizer_key_hash: UNUSED_ORGANIZER_KEY_HASH,
+    course: DEFAULT_BARCELONA_COURSE as unknown as Record<string, unknown>,
+  });
+
+  if (error?.code === "23505") {
+    return;
+  }
+  if (error) {
+    throw new Error(`ensureSingleEvent: ${error.message}`);
+  }
 }

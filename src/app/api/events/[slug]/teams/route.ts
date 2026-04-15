@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { verifyOrganizerKey } from "@/lib/hash";
-import { getEventBySlug } from "@/lib/queries";
+import { ensureSingleEvent, getEventBySlug } from "@/lib/queries";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isAllowedEventSlug } from "@/lib/singleEvent";
 
 const createTeamSchema = z.object({
   name: z.string().min(1).max(120),
@@ -16,14 +16,14 @@ type RouteContext = { params: Promise<{ slug: string }> };
 
 export async function POST(req: Request, context: RouteContext) {
   const { slug } = await context.params;
-  const event = await getEventBySlug(slug);
-  if (!event) {
+  if (!isAllowedEventSlug(slug)) {
     return NextResponse.json({ error: "Event not found" }, { status: 404 });
   }
 
-  const organizerKey = req.headers.get("x-organizer-key") ?? "";
-  if (!verifyOrganizerKey(organizerKey, event.organizer_key_hash)) {
-    return NextResponse.json({ error: "Invalid organizer key" }, { status: 401 });
+  await ensureSingleEvent();
+  const event = await getEventBySlug(slug);
+  if (!event) {
+    return NextResponse.json({ error: "Event not found" }, { status: 404 });
   }
 
   let json: unknown;

@@ -4,9 +4,13 @@
 
 - Initialized **Next.js 15** (App Router, TypeScript, Tailwind) in-repo.
 - Implemented **Supabase** schema (`events`, `teams`) with public `SELECT` RLS and server-side writes via service role; migration in `supabase/migrations/001_pubgolf.sql`.
-- Added **API routes**: create event, add team (organizer key), patch scores (player token).
-- Built **UI**: home (create event), event leaderboard + add team, team hub with player links, player score entry with debounced saves and **Supabase Realtime** subscriptions.
+- Added **API routes**: add team (open), patch scores (player token).
+- Built **UI**: redirect home to single event, leaderboard + add team, team hub with player links, player score entry with debounced saves and **Supabase Realtime** subscriptions.
 - Added **Vitest** tests for scoring helpers (`src/lib/scoring.test.ts`).
+
+## Later
+
+- **Single-event-only, no organizer key** (`src/lib/singleEvent.ts`, `ensureSingleEvent()`): `/` → `/e/barcelona-pub-golf`; only that slug is valid; create-event API removed; add-team requires no secret.
 
 ### Operational notes
 

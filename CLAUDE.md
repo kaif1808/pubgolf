@@ -8,55 +8,62 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 npm run dev      # Start dev server with Turbopack on localhost:3000
 npm run build    # Production build
 npm run lint     # ESLint
-npx vitest       # Run tests
-npx vitest run src/lib/scoring.ts   # Run a single test file
+npm run test     # Vitest (scoring helpers)
 ```
 
 ## Environment Variables
 
 Required in `.env.local`:
+
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
-ORGANIZER_PEPPER=        # optional; falls back to SERVICE_ROLE_KEY then a dev default
+```
+
+Optional:
+
+```
+NEXT_PUBLIC_EVENT_SLUG=   # default: barcelona-pub-golf
 ```
 
 ## Architecture
 
-**Pub Golf** is a real-time scorecard app for pub crawl events. Each event has a 9-hole "course" (one bar per hole), teams of 3 players, and a live leaderboard via Supabase Realtime.
+**Pub Golf** is a real-time scorecard for a **single** Barcelona course deployment. The app hosts one logical event; `/` redirects to `/e/{SINGLE_EVENT_SLUG}`. `ensureSingleEvent()` in `src/lib/queries.ts` inserts the lone `events` row on first visit (course JSON + dummy `organizer_key_hash` `"unused"` — column kept for legacy schema; no organizer auth).
 
 ### Data model (`supabase/migrations/001_pubgolf.sql`)
 
-- `events` — one row per pub golf event; holds the entire course definition as a `jsonb` column, plus an `organizer_key_hash` for gating write operations.
-- `teams` — belongs to an event; stores `scores` (JSONB, keyed by hole number string `"1"`–`"9"`, each containing per-player strokes `{p1,p2,p3}`) and `penalties` (`{p1,p2,p3}` integers). Each player gets a UUID token (`player_token_1/2/3`) for authentication.
-- RLS: public SELECT for anon (leaderboard + Realtime); all mutations go through Next.js API routes using the service-role key.
-- `teams` is added to `supabase_realtime` with `replica identity full` for live updates.
+- `events` — effectively one row; holds the course definition as `jsonb`.
+- `teams` — belongs to the event; stores `scores` (JSONB, holes `"1"`–`"9"`, `{p1,p2,p3}`) and `penalties`. Each player has a UUID token (`player_token_1/2/3`) for PATCH scoping.
+- RLS: public SELECT for anon (leaderboard + Realtime); mutations via Next.js + service role.
+- `teams` is in `supabase_realtime` with `replica identity full`.
 
 ### API routes (`src/app/api/`)
 
 | Route | Method | Auth | Purpose |
 |---|---|---|---|
-| `/api/events` | POST | none | Create event; returns `organizerKey` (plaintext, shown once) |
-| `/api/events/[slug]/teams` | POST | `x-organizer-key` header | Add team to event |
-| `/api/teams/[teamId]/scores` | PATCH | `playerToken` in body | Player submits/updates their hole scores and penalties |
+| `/api/events/[slug]/teams` | POST | none (open add-team; slug must match `SINGLE_EVENT_SLUG`) | Add team |
+| `/api/teams/[teamId]/scores` | PATCH | `playerToken` in body | Player updates their column |
 
 ### Scoring logic (`src/lib/scoring.ts`)
 
-- Each player's score per hole: raw strokes + **−1 bonus** if strokes ≤ par (incentivises drinking faster).
-- Team aggregate = sum of all three players' `final` scores (raw − bonus + penalties).
-- `mergePlayerHoleScores` (`src/lib/mergeScores.ts`) does a non-destructive merge so one player's patch never overwrites another player's scores.
+- Per-hole: raw strokes; **−1 bonus** per hole if strokes ≤ par.
+- Team aggregate = sum of three players’ finals (raw − bonus + penalties).
+- `mergePlayerHoleScores` (`src/lib/mergeScores.ts`) merges one slot only.
 
 ### Auth model
 
-- **Organizer key**: random 48-char hex, SHA-256 hashed with a pepper before storage. Timing-safe comparison in `src/lib/hash.ts`. Organizers use this key to manage their event (add teams, etc.).
-- **Player token**: UUID stored on the team row. Passed in PATCH requests to identify which player slot (`p1`/`p2`/`p3`) is submitting scores.
+- **Player token**: UUID on the team row; PATCH identifies `p1`/`p2`/`p3`. No organizer key.
+
+### Config (`src/lib/singleEvent.ts`)
+
+- `SINGLE_EVENT_SLUG`, `SINGLE_EVENT_TITLE`, `isAllowedEventSlug()`.
 
 ### Supabase clients
 
-- `src/lib/supabase/admin.ts` — service-role client, used server-side only (`import "server-only"` in `queries.ts`).
-- `src/lib/supabase/browser.ts` — anon client for client-side Realtime subscriptions.
+- `src/lib/supabase/admin.ts` — service role, server-only.
+- `src/lib/supabase/browser.ts` — anon client for Realtime.
 
 ### Course definition (`src/lib/course.ts`)
 
-The `Course` type (id, meta, holes array) is stored as JSONB in the `events` table. `DEFAULT_BARCELONA_COURSE` is the hardcoded 9-hole Barcelona course used when creating new events. `parseCourse` in `queries.ts` falls back to this default if the DB value is malformed.
+`DEFAULT_BARCELONA_COURSE` is inserted by `ensureSingleEvent()`. `parseCourse` in `queries.ts` falls back if DB JSON is malformed.

@@ -3,8 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const STORAGE_PREFIX = "pubgolf:organizer:";
-
 type Props = {
   eventSlug: string;
 };
@@ -15,31 +13,17 @@ export default function AddTeamForm({ eventSlug }: Props) {
   const [p1, setP1] = useState("");
   const [p2, setP2] = useState("");
   const [p3, setP3] = useState("");
-  const [organizerKey, setOrganizerKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-
-  function loadKeyFromStorage() {
-    if (typeof window === "undefined") return;
-    const k = window.sessionStorage.getItem(`${STORAGE_PREFIX}${eventSlug}`);
-    if (k) setOrganizerKey(k);
-  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
     setLoading(true);
     try {
-      const key =
-        organizerKey || (typeof window !== "undefined"
-          ? window.sessionStorage.getItem(`${STORAGE_PREFIX}${eventSlug}`) ?? ""
-          : "");
       const res = await fetch(`/api/events/${eventSlug}/teams`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(key ? { "X-Organizer-Key": key } : {}),
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
           player_1: p1,
@@ -68,32 +52,9 @@ export default function AddTeamForm({ eventSlug }: Props) {
     <div className="rounded-sm border-2 border-black bg-white p-4 shadow-lg">
       <h2 className="mb-3 font-[family-name:var(--font-playfair)] text-xl font-black">Add team</h2>
       <p className="mb-3 text-sm text-[#424242]">
-        Requires organizer key (paste below or{" "}
-        <button
-          type="button"
-          className="underline"
-          onClick={() => {
-            loadKeyFromStorage();
-          }}
-        >
-          load from this browser
-        </button>
-        if you created the event here).
+        Add a team, then open the team page and share each player&apos;s score link with them.
       </p>
       <form className="space-y-3" onSubmit={onSubmit}>
-        <div>
-          <label className="pg-label" htmlFor="org-key">
-            Organizer key
-          </label>
-          <input
-            id="org-key"
-            className="pg-input font-mono text-sm"
-            value={organizerKey}
-            onChange={(e) => setOrganizerKey(e.target.value)}
-            placeholder="Paste organizer key"
-            autoComplete="off"
-          />
-        </div>
         <div>
           <label className="pg-label" htmlFor="team-name">
             Team name

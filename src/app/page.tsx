@@ -1,9 +1,7 @@
-import CreateEventForm from "@/components/CreateEventForm";
+import { redirect } from "next/navigation";
+
+import { SINGLE_EVENT_SLUG } from "@/lib/singleEvent";
 
 export default function Home() {
-  return (
-    <div className="pg-shell">
-      <CreateEventForm />
-    </div>
-  );
+  redirect(`/e/${SINGLE_EVENT_SLUG}`);
 }
