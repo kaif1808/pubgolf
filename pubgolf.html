@@ -248,6 +248,13 @@
   }
   tr.total td.label { text-align: right; padding-right: 4mm; }
 
+  tr.total > td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    box-shadow: 4px 0 8px rgba(26, 46, 38, 0.08);
+  }
+
   /* Footer panels */
   .footer {
     display: grid;
@@ -465,7 +472,7 @@
       <tr class="total">
         <td colspan="3" class="label">Course Total</td>
         <td class="par-total">34</td>
-        <td></td><td></td><td></td>
+        <td>—</td><td>—</td><td>—</td>
       </tr>
       <tr class="total">
         <td colspan="3" class="label">+ Penalties</td>

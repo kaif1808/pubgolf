@@ -384,9 +384,9 @@ export default function PlayerScorecard({
                 Course Total
               </td>
               <td className="pg-par-total">{course.meta.coursePar}</td>
-              <td />
-              <td />
-              <td />
+              <td>—</td>
+              <td>—</td>
+              <td>—</td>
             </tr>
             <ScorecardTotalsRows p1={p1} p2={p2} p3={p3} />
             <tr className="pg-total">

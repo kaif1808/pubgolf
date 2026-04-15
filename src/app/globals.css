@@ -310,6 +310,14 @@ body {
   padding-right: 4mm;
 }
 
+/* Keep colspan label block (holes # + bar + drink) pinned when scrolling to P1–P3 */
+tr.pg-total > td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-shadow: 4px 0 8px rgba(26, 46, 38, 0.08);
+}
+
 .pg-footer {
   display: grid;
   grid-template-columns: 1.3fr 1fr;
