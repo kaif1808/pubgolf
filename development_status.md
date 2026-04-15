@@ -7,6 +7,7 @@
 - Added **API routes**: add team (open), patch scores (player token).
 - Built **UI**: redirect home to single event, leaderboard + add team, team hub with player links, player score entry with debounced saves and **Supabase Realtime** subscriptions.
 - Added **Vitest** tests for scoring helpers (`src/lib/scoring.test.ts`).
+- **Production (Vercel)**: Confirmed Supabase env vars are set for Production/Preview/Development. The live app pointed at a Supabase project where `001_pubgolf.sql` had not been applied, which caused `ensureSingleEvent` / PostgREST errors. Ran that migration against the database backing Production’s `NEXT_PUBLIC_SUPABASE_URL` so `public.events` / `public.teams` exist; smoke-tested `https://pubgolf-beta.vercel.app/e/barcelona-pub-golf` (HTTP 200).
 
 ## Later
 
