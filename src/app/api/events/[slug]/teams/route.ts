@@ -49,7 +49,7 @@ export async function POST(req: Request, context: RouteContext) {
       player_3: parsed.data.player_3,
     })
     .select(
-      "id, name, player_1, player_2, player_3, player_token_1, player_token_2, player_token_3, scores, penalties, updated_at",
+      "id, name, player_1, player_2, player_3, player_token_1, player_token_2, player_token_3, scores, penalties, penalty_suggestions, updated_at",
     )
     .single();
 

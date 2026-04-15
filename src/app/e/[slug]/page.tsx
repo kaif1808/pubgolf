@@ -23,7 +23,7 @@ export default async function EventPage({ params }: PageProps) {
         <h1 className="font-[family-name:var(--font-playfair)] text-3xl font-black tracking-tight">
           {event.title}
         </h1>
-        <p className="mt-1 text-sm text-[#424242]">
+        <p className="mt-1 text-sm text-pg-gray-700">
           Barcelona Pub Golf · <span className="font-mono">/e/{event.slug}</span>
         </p>
       </div>

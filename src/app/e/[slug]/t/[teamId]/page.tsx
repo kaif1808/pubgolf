@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 
 import PlayerLinks from "@/components/PlayerLinks";
 import PrintButton from "@/components/PrintButton";
-import ScorecardView from "@/components/ScorecardView";
+import TeamHubScorecard from "@/components/TeamHubScorecard";
 import { getEventForTeam, getTeamById } from "@/lib/queries";
 
 type PageProps = { params: Promise<{ slug: string; teamId: string }> };
@@ -39,7 +39,7 @@ export default async function TeamHubPage({ params }: PageProps) {
         labels={{ p1: team.player_1, p2: team.player_2, p3: team.player_3 }}
       />
 
-      <ScorecardView course={event.course} team={team} scores={team.scores} penalties={team.penalties} />
+      <TeamHubScorecard course={event.course} team={team} eventSlug={slug} />
     </div>
   );
 }

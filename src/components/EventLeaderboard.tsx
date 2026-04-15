@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { Course } from "@/lib/course";
+import { normalizePenaltySuggestions } from "@/lib/penaltySuggestions";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import type { TeamRow } from "@/lib/queries";
 import { teamAggregateScore } from "@/lib/scoring";
@@ -82,6 +83,9 @@ export default function EventLeaderboard({
               player_token_3: String(row.player_token_3),
               scores: (row.scores ?? {}) as TeamRow["scores"],
               penalties: normalizePenalties(row.penalties),
+              penalty_suggestions: normalizePenaltySuggestions(
+                (row as { penalty_suggestions?: unknown }).penalty_suggestions,
+              ),
               updated_at: String(row.updated_at ?? new Date().toISOString()),
             };
             setTeams((prev) => {
@@ -101,6 +105,13 @@ export default function EventLeaderboard({
                       name: String(row.name ?? t.name),
                       scores: (row.scores ?? t.scores) as TeamRow["scores"],
                       penalties: normalizePenalties(row.penalties ?? t.penalties),
+                      penalty_suggestions:
+                        (row as { penalty_suggestions?: unknown }).penalty_suggestions !==
+                        undefined
+                          ? normalizePenaltySuggestions(
+                              (row as { penalty_suggestions?: unknown }).penalty_suggestions,
+                            )
+                          : t.penalty_suggestions,
                       updated_at: String(row.updated_at ?? t.updated_at),
                     }
                   : t,
@@ -127,15 +138,15 @@ export default function EventLeaderboard({
         Leaderboard
       </h2>
       {rows.length === 0 ? (
-        <p className="text-sm text-[#424242]">No teams yet. Add one below.</p>
+        <p className="text-sm text-pg-gray-700">No teams yet. Add one below.</p>
       ) : (
         <ol className="space-y-2">
           {rows.map((r, i) => (
             <li
               key={r.id}
-              className="flex flex-wrap items-baseline justify-between gap-2 border-b border-dotted border-[#bdbdbd] pb-2"
+              className="flex flex-wrap items-baseline justify-between gap-2 border-b border-dotted border-pg-grid pb-2"
             >
-              <span className="text-sm text-[#424242]">
+              <span className="text-sm text-pg-gray-700">
                 {i + 1}.{" "}
                 <Link className="font-semibold text-black underline" href={`/e/${eventSlug}/t/${r.id}`}>
                   {r.name}

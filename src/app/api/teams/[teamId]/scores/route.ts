@@ -78,7 +78,7 @@ export async function PATCH(req: Request, context: RouteContext) {
     })
     .eq("id", team.id)
     .select(
-      "id, event_id, name, player_1, player_2, player_3, scores, penalties, updated_at",
+      "id, event_id, name, player_1, player_2, player_3, scores, penalties, penalty_suggestions, updated_at",
     )
     .single();
 

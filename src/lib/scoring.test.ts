@@ -54,4 +54,20 @@ describe("teamAggregateScore", () => {
     expect(p1.final).toBe(0);
     expect(t).toBe(0);
   });
+
+  it("matches sum of per-player finals (display identity)", () => {
+    const scores: ScoresJson = {
+      "1": { p1: 3, p2: 4, p3: 5 },
+      "2": { p1: 2, p2: 2 },
+    };
+    const pen = { ...emptyPenalties(), p2: 1 };
+    const a = playerStrokeTotalWithPenalties(DEFAULT_BARCELONA_COURSE, scores, "p1", pen);
+    const b = playerStrokeTotalWithPenalties(DEFAULT_BARCELONA_COURSE, scores, "p2", pen);
+    const c = playerStrokeTotalWithPenalties(DEFAULT_BARCELONA_COURSE, scores, "p3", pen);
+    expect(a.final + b.final + c.final).toBe(
+      teamAggregateScore(DEFAULT_BARCELONA_COURSE, scores, pen),
+    );
+    expect(a.final).toBe(a.raw - a.bonus + a.penalties);
+    expect(b.final).toBe(b.raw - b.bonus + b.penalties);
+  });
 });

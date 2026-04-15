@@ -2,6 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Course } from "@/lib/course";
+import {
+  normalizePenaltySuggestions,
+  type PenaltySuggestion,
+} from "@/lib/penaltySuggestions";
 import type { TeamRow } from "@/lib/queries";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import {
@@ -9,6 +13,7 @@ import {
   type PlayerSlot,
   type ScoresJson,
 } from "@/lib/scoring";
+import ScorecardTotalsRows from "@/components/ScorecardTotalsRows";
 
 type Props = {
   course: Course;
@@ -16,9 +21,17 @@ type Props = {
   eventSlug: string;
   playerToken: string;
   slot: PlayerSlot;
+  /** When false, hide the top “Editing as …” bar (e.g. team hub has its own slot control). */
+  showEditingBanner?: boolean;
 };
 
 const DEBOUNCE_MS = 450;
+
+function labelForTeamSlot(team: TeamRow, s: PlayerSlot): string {
+  if (s === "p1") return team.player_1;
+  if (s === "p2") return team.player_2;
+  return team.player_3;
+}
 
 export default function PlayerScorecard({
   course,
@@ -26,14 +39,23 @@ export default function PlayerScorecard({
   eventSlug,
   playerToken,
   slot,
+  showEditingBanner = true,
 }: Props) {
   const [scores, setScores] = useState<ScoresJson>(team.scores);
   const [penalties, setPenalties] = useState(team.penalties);
+  const [suggestions, setSuggestions] = useState<PenaltySuggestion[]>(
+    team.penalty_suggestions,
+  );
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
   const [err, setErr] = useState<string | null>(null);
+  const [suggestErr, setSuggestErr] = useState<string | null>(null);
+  const [suggestNote, setSuggestNote] = useState("");
+  const [suggestStrokes, setSuggestStrokes] = useState(1);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scoresRef = useRef(scores);
   const penaltiesRef = useRef(penalties);
+  const mounted = useRef(true);
+  const flushRef = useRef<() => Promise<void>>(async () => {});
 
   useEffect(() => {
     scoresRef.current = scores;
@@ -43,11 +65,18 @@ export default function PlayerScorecard({
     penaltiesRef.current = penalties;
   }, [penalties]);
 
+  useEffect(() => {
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
   const p1 = playerStrokeTotalWithPenalties(course, scores, "p1", penalties);
   const p2 = playerStrokeTotalWithPenalties(course, scores, "p2", penalties);
   const p3 = playerStrokeTotalWithPenalties(course, scores, "p3", penalties);
 
   const flush = useCallback(async () => {
+    if (!mounted.current) return;
     setStatus("saving");
     setErr(null);
     const s = scoresRef.current;
@@ -70,6 +99,7 @@ export default function PlayerScorecard({
         }),
       });
       const data = await res.json();
+      if (!mounted.current) return;
       if (!res.ok) {
         setStatus("error");
         setErr(typeof data.error === "string" ? data.error : "Save failed");
@@ -78,22 +108,32 @@ export default function PlayerScorecard({
       setStatus("idle");
       if (data.team?.scores) setScores(data.team.scores as ScoresJson);
       if (data.team?.penalties) setPenalties(data.team.penalties);
+      if (data.team?.penalty_suggestions !== undefined) {
+        setSuggestions(normalizePenaltySuggestions(data.team.penalty_suggestions));
+      }
     } catch {
+      if (!mounted.current) return;
       setStatus("error");
       setErr("Network error");
     }
   }, [course.holes, playerToken, slot, team.id]);
 
+  flushRef.current = flush;
+
   const scheduleSave = useCallback(() => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = setTimeout(() => {
-      void flush();
+      void flushRef.current();
     }, DEBOUNCE_MS);
-  }, [flush]);
+  }, []);
 
   useEffect(() => {
     return () => {
-      if (timer.current) clearTimeout(timer.current);
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      void flushRef.current();
     };
   }, []);
 
@@ -113,9 +153,13 @@ export default function PlayerScorecard({
           const next = payload.new as {
             scores?: ScoresJson;
             penalties?: TeamRow["penalties"];
+            penalty_suggestions?: unknown;
           };
           if (next.scores) setScores(next.scores);
           if (next.penalties) setPenalties(next.penalties);
+          if (next.penalty_suggestions !== undefined) {
+            setSuggestions(normalizePenaltySuggestions(next.penalty_suggestions));
+          }
         },
       )
       .subscribe();
@@ -124,11 +168,71 @@ export default function PlayerScorecard({
     };
   }, [team.id]);
 
-  const labelForSlot = useMemo(() => {
-    if (slot === "p1") return team.player_1;
-    if (slot === "p2") return team.player_2;
-    return team.player_3;
-  }, [slot, team.player_1, team.player_2, team.player_3]);
+  const labelForSlot = useMemo(() => labelForTeamSlot(team, slot), [slot, team]);
+
+  const otherSlots = useMemo((): PlayerSlot[] => {
+    return (["p1", "p2", "p3"] as const).filter((s) => s !== slot);
+  }, [slot]);
+
+  const incoming = useMemo(
+    () => suggestions.filter((s) => s.status === "pending" && s.toSlot === slot),
+    [suggestions, slot],
+  );
+
+  const outgoing = useMemo(
+    () => suggestions.filter((s) => s.status === "pending" && s.fromSlot === slot),
+    [suggestions, slot],
+  );
+
+  async function postSuggestion(toSlot: PlayerSlot) {
+    setSuggestErr(null);
+    try {
+      const res = await fetch(`/api/teams/${team.id}/penalty-suggestions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          playerToken,
+          toSlot,
+          strokes: suggestStrokes,
+          note: suggestNote.trim() || undefined,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSuggestErr(typeof data.error === "string" ? data.error : "Could not send");
+        return;
+      }
+      if (data.team?.penalty_suggestions !== undefined) {
+        setSuggestions(normalizePenaltySuggestions(data.team.penalty_suggestions));
+      }
+      setSuggestNote("");
+    } catch {
+      setSuggestErr("Network error");
+    }
+  }
+
+  async function resolveSuggestion(suggestionId: string, action: "accept" | "dismiss") {
+    setSuggestErr(null);
+    try {
+      const res = await fetch(`/api/teams/${team.id}/penalty-suggestions`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerToken, suggestionId, action }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setSuggestErr(typeof data.error === "string" ? data.error : "Could not update");
+        return;
+      }
+      if (data.team?.scores) setScores(data.team.scores as ScoresJson);
+      if (data.team?.penalties) setPenalties(data.team.penalties);
+      if (data.team?.penalty_suggestions !== undefined) {
+        setSuggestions(normalizePenaltySuggestions(data.team.penalty_suggestions));
+      }
+    } catch {
+      setSuggestErr("Network error");
+    }
+  }
 
   function setHole(hole: number, value: string) {
     const key = String(hole);
@@ -161,17 +265,25 @@ export default function PlayerScorecard({
 
   return (
     <div className="pg-card">
-      <div className="no-print mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-black pb-2">
-        <p className="text-sm text-[#424242]">
-          Editing as <strong>{labelForSlot}</strong> · Event{" "}
-          <a className="underline" href={`/e/${eventSlug}`}>
-            {eventSlug}
-          </a>
-        </p>
-        <span className="text-xs uppercase tracking-widest text-[#424242]">
-          {status === "saving" ? "Saving…" : status === "error" ? "Save issue" : "Saved"}
-        </span>
-      </div>
+      {showEditingBanner ? (
+        <div className="no-print mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-black pb-2">
+          <p className="text-sm text-pg-gray-700">
+            Editing as <strong>{labelForSlot}</strong> · Event{" "}
+            <a className="underline" href={`/e/${eventSlug}`}>
+              {eventSlug}
+            </a>
+          </p>
+          <span className="text-xs uppercase tracking-widest text-pg-gray-700">
+            {status === "saving" ? "Saving…" : status === "error" ? "Save issue" : "Saved"}
+          </span>
+        </div>
+      ) : (
+        <div className="no-print mb-3 flex flex-wrap items-center justify-end gap-2 border-b border-black pb-2">
+          <span className="text-xs uppercase tracking-widest text-pg-gray-700">
+            {status === "saving" ? "Saving…" : status === "error" ? "Save issue" : "Saved"}
+          </span>
+        </div>
+      )}
       {err ? <p className="no-print mb-2 text-sm text-red-800">{err}</p> : null}
 
       <header className="pg-header">
@@ -273,6 +385,7 @@ export default function PlayerScorecard({
               <td />
               <td />
             </tr>
+            <ScorecardTotalsRows p1={p1} p2={p2} p3={p3} />
             <tr className="pg-total">
               <td colSpan={3} className="pg-label">
                 + Penalties
@@ -309,6 +422,107 @@ export default function PlayerScorecard({
         </table>
       </div>
 
+      <div className="no-print mt-4 space-y-3 rounded-sm border border-pg-grid bg-pg-white p-3">
+        <h3 className="font-[family-name:var(--font-playfair)] text-sm font-black uppercase tracking-widest">
+          Penalty suggestions
+        </h3>
+        {suggestErr ? <p className="text-sm text-red-800">{suggestErr}</p> : null}
+        <div className="flex flex-wrap items-end gap-3">
+          <div>
+            <label className="pg-label" htmlFor="sug-strokes">
+              Strokes
+            </label>
+            <input
+              id="sug-strokes"
+              className="pg-input w-20"
+              inputMode="numeric"
+              min={1}
+              max={99}
+              value={suggestStrokes}
+              onChange={(e) =>
+                setSuggestStrokes(Math.max(1, Math.min(99, Number(e.target.value) || 1)))
+              }
+            />
+          </div>
+          <div className="min-w-[12rem] flex-1">
+            <label className="pg-label" htmlFor="sug-note">
+              Note (optional)
+            </label>
+            <input
+              id="sug-note"
+              className="pg-input"
+              value={suggestNote}
+              onChange={(e) => setSuggestNote(e.target.value)}
+              placeholder="Rule breach, etc."
+              maxLength={200}
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {otherSlots.map((s) => (
+            <button
+              key={s}
+              type="button"
+              className="pg-btn text-sm"
+              onClick={() => void postSuggestion(s)}
+            >
+              Suggest to {labelForTeamSlot(team, s)}
+            </button>
+          ))}
+        </div>
+        {incoming.length > 0 ? (
+          <div>
+            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-pg-gray-700">
+              For you to accept or dismiss
+            </p>
+            <ul className="space-y-2">
+              {incoming.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-2 border-b border-dotted border-pg-grid pb-2 text-sm"
+                >
+                  <span>
+                    From <strong>{labelForTeamSlot(team, s.fromSlot)}</strong>: +{s.strokes}{" "}
+                    {s.note ? <span className="text-pg-gray-700">({s.note})</span> : null}
+                  </span>
+                  <span className="flex gap-2">
+                    <button
+                      type="button"
+                      className="pg-btn text-xs"
+                      onClick={() => void resolveSuggestion(s.id, "accept")}
+                    >
+                      Accept
+                    </button>
+                    <button
+                      type="button"
+                      className="pg-btn text-xs"
+                      onClick={() => void resolveSuggestion(s.id, "dismiss")}
+                    >
+                      Dismiss
+                    </button>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        {outgoing.length > 0 ? (
+          <div>
+            <p className="mb-1 text-xs font-bold uppercase tracking-widest text-pg-gray-700">
+              Waiting on them
+            </p>
+            <ul className="text-sm text-pg-gray-700">
+              {outgoing.map((s) => (
+                <li key={s.id}>
+                  Pending +{s.strokes} for {labelForTeamSlot(team, s.toSlot)}
+                  {s.note ? ` (${s.note})` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+      </div>
+
       <footer className="pg-footer">
         <div className="pg-panel">
           <h3>How to Score</h3>
@@ -334,7 +548,7 @@ export default function PlayerScorecard({
           <p className="text-[8.5pt] leading-relaxed">
             P1: {penalties.p1} · P2: {penalties.p2} · P3: {penalties.p3}
           </p>
-          <div className="mt-2 text-center text-[8pt] text-[#424242]">
+          <div className="mt-2 text-center text-[8pt] text-pg-gray-700">
             Team aggregate: {p1.final + p2.final + p3.final}
           </div>
         </div>

@@ -8,6 +8,10 @@ import {
   SINGLE_EVENT_TITLE,
   UNUSED_ORGANIZER_KEY_HASH,
 } from "@/lib/singleEvent";
+import {
+  normalizePenaltySuggestions,
+  type PenaltySuggestion,
+} from "@/lib/penaltySuggestions";
 import type { PenaltiesJson, ScoresJson } from "@/lib/scoring";
 
 export type EventRow = {
@@ -31,6 +35,7 @@ export type TeamRow = {
   player_token_3: string;
   scores: ScoresJson;
   penalties: PenaltiesJson;
+  penalty_suggestions: PenaltySuggestion[];
   updated_at: string;
 };
 
@@ -67,6 +72,9 @@ export async function getTeamsForEvent(eventId: string): Promise<TeamRow[]> {
     ...t,
     scores: (t.scores ?? {}) as ScoresJson,
     penalties: normalizePenalties(t.penalties),
+    penalty_suggestions: normalizePenaltySuggestions(
+      (t as { penalty_suggestions?: unknown }).penalty_suggestions,
+    ),
   }));
 }
 
@@ -94,6 +102,9 @@ export async function getTeamById(teamId: string): Promise<TeamRow | null> {
     ...data,
     scores: (data.scores ?? {}) as ScoresJson,
     penalties: normalizePenalties(data.penalties),
+    penalty_suggestions: normalizePenaltySuggestions(
+      (data as { penalty_suggestions?: unknown }).penalty_suggestions,
+    ),
   };
 }
 
