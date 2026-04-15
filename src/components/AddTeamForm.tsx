@@ -49,7 +49,7 @@ export default function AddTeamForm({ eventSlug }: Props) {
   }
 
   return (
-    <div className="rounded-sm border-2 border-black bg-white p-4 shadow-lg">
+    <div className="rounded-sm border-2 border-pg-black bg-pg-white p-4 shadow-lg">
       <h2 className="mb-3 font-[family-name:var(--font-playfair)] text-xl font-black">Add team</h2>
       <p className="mb-3 text-sm text-pg-gray-700">
         Add a team, then open the team page and share each player&apos;s score link with them.

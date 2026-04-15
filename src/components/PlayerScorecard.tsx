@@ -266,7 +266,7 @@ export default function PlayerScorecard({
   return (
     <div className="pg-card">
       {showEditingBanner ? (
-        <div className="no-print mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-black pb-2">
+        <div className="no-print mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-pg-black pb-2">
           <p className="text-sm text-pg-gray-700">
             Editing as <strong>{labelForSlot}</strong> · Event{" "}
             <a className="underline" href={`/e/${eventSlug}`}>
@@ -278,7 +278,7 @@ export default function PlayerScorecard({
           </span>
         </div>
       ) : (
-        <div className="no-print mb-3 flex flex-wrap items-center justify-end gap-2 border-b border-black pb-2">
+        <div className="no-print mb-3 flex flex-wrap items-center justify-end gap-2 border-b border-pg-black pb-2">
           <span className="text-xs uppercase tracking-widest text-pg-gray-700">
             {status === "saving" ? "Saving…" : status === "error" ? "Save issue" : "Saved"}
           </span>

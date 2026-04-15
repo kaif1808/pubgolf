@@ -8,6 +8,11 @@ type Props = {
   p3: Row;
 };
 
+function formatParBonusSubtract(bonus: number): string {
+  if (bonus === 0) return "0";
+  return `−${bonus}`;
+}
+
 export default function ScorecardTotalsRows({ p1, p2, p3 }: Props) {
   return (
     <>
@@ -25,9 +30,18 @@ export default function ScorecardTotalsRows({ p1, p2, p3 }: Props) {
           Par bonus (−)
         </td>
         <td>—</td>
-        <td>−{p1.bonus}</td>
-        <td>−{p2.bonus}</td>
-        <td>−{p3.bonus}</td>
+        <td>{formatParBonusSubtract(p1.bonus)}</td>
+        <td>{formatParBonusSubtract(p2.bonus)}</td>
+        <td>{formatParBonusSubtract(p3.bonus)}</td>
+      </tr>
+      <tr className="pg-total">
+        <td colSpan={3} className="pg-label">
+          After par bonus
+        </td>
+        <td>—</td>
+        <td>{p1.raw - p1.bonus}</td>
+        <td>{p2.raw - p2.bonus}</td>
+        <td>{p3.raw - p3.bonus}</td>
       </tr>
     </>
   );

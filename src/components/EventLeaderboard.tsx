@@ -133,7 +133,7 @@ export default function EventLeaderboard({
   const rows = useMemo(() => toRows(course, teams), [course, teams]);
 
   return (
-    <div className="rounded-sm border-2 border-black bg-white p-4 shadow-lg">
+    <div className="rounded-sm border-2 border-pg-black bg-pg-white p-4 shadow-lg">
       <h2 className="mb-3 font-[family-name:var(--font-playfair)] text-xl font-black">
         Leaderboard
       </h2>
@@ -148,7 +148,7 @@ export default function EventLeaderboard({
             >
               <span className="text-sm text-pg-gray-700">
                 {i + 1}.{" "}
-                <Link className="font-semibold text-black underline" href={`/e/${eventSlug}/t/${r.id}`}>
+                <Link className="font-semibold text-pg-black underline" href={`/e/${eventSlug}/t/${r.id}`}>
                   {r.name}
                 </Link>
               </span>

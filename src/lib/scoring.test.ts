@@ -40,6 +40,22 @@ describe("playerStrokeTotalWithPenalties", () => {
     expect(r.bonus).toBe(1);
     expect(r.final).toBe(10);
   });
+
+  it("final equals (raw − bonus) + penalties (net before penalties + penalties)", () => {
+    const scores: ScoresJson = {
+      "1": { p1: 4 },
+      "2": { p1: 6 },
+    };
+    const penalties = { ...emptyPenalties(), p1: 3 };
+    const r = playerStrokeTotalWithPenalties(
+      DEFAULT_BARCELONA_COURSE,
+      scores,
+      "p1",
+      penalties,
+    );
+    const netAfterParBonus = r.raw - r.bonus;
+    expect(r.final).toBe(netAfterParBonus + r.penalties);
+  });
 });
 
 describe("teamAggregateScore", () => {

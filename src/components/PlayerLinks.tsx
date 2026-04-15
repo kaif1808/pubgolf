@@ -38,7 +38,7 @@ export default function PlayerLinks({ eventSlug, teamId, tokens, labels }: Props
   ];
 
   return (
-    <div className="rounded-sm border-2 border-black bg-white p-4 shadow-lg">
+    <div className="rounded-sm border-2 border-pg-black bg-pg-white p-4 shadow-lg">
       <h2 className="mb-2 font-[family-name:var(--font-playfair)] text-xl font-black">
         Player score links
       </h2>

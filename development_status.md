@@ -2,6 +2,9 @@
 
 ## 2026-04-15
 
+- **Supabase `penalty_suggestions`**: If PostgREST reports a missing `penalty_suggestions` column, run [`002_penalty_suggestions.sql`](supabase/migrations/002_penalty_suggestions.sql) in the SQL editor for the **same** project as `NEXT_PUBLIC_SUPABASE_URL`. If the schema cache lags, run `NOTIFY pgrst, 'reload schema';` there (or wait a minute).
+- **Scorecard totals**: Table includes **After par bonus** (`raw − bonus`) between par bonus and penalties; par bonus cells show `0` instead of `−0` when there is no bonus.
+- **Theme**: Shell cards and links use `border-pg-black` / `bg-pg-white` / `text-pg-black` instead of default Tailwind `black`/`white`.
 - **Team score UX**: Team hub (`/e/.../t/[teamId]`) uses `TeamHubScorecard` with an in-page “Enter scores as…” control so players can edit the scorecard without opening separate links; `PlayerScorecard` flushes debounced saves on unmount when switching the active player.
 - **Tally clarity**: Score table includes **Strokes (raw)** and **Par bonus (−)** total rows before penalties and final (via `ScorecardTotalsRows`); tests document `final === raw − bonus + penalties` and aggregate consistency.
 - **Theme**: Tailwind `pg-*` color tokens map to the same `:root` grayscale variables as `pubgolf.html` / `globals.css`; replaced ad hoc hex classes in leaderboard, forms, and links.
