@@ -20,7 +20,10 @@ export default async function TeamHubPage({ params }: PageProps) {
     <div className="pg-shell mx-auto max-w-4xl space-y-8">
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link className="text-sm underline" href={`/e/${slug}`}>
+          <Link
+            className="text-sm text-pg-accent underline decoration-pg-accent-muted underline-offset-2 hover:text-pg-accent-hover"
+            href={`/e/${slug}`}
+          >
             ← Leaderboard
           </Link>
           <h1 className="mt-2 font-[family-name:var(--font-playfair)] text-2xl font-black">{team.name}</h1>

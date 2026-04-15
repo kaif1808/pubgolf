@@ -9,15 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700;1,900&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Pure B&W / Grayscale Palette for Ink Saving */
-    --white: #ffffff;
-    --black: #000000;
-    --gray-100: #f4f4f4;
-    --gray-200: #e0e0e0;
-    --gray-400: #9e9e9e;
-    --gray-700: #424242;
-    --gray-900: #212121;
-    --grid: #bdbdbd;
+    /* Warm pub / Barcelona — aligned with src/app/globals.css */
+    --white: #faf6f0;
+    --black: #1a2e26;
+    --gray-100: #f0ebe3;
+    --gray-200: #e8ebe4;
+    --gray-400: #9a9288;
+    --gray-700: #4d4540;
+    --gray-900: #2c2825;
+    --grid: #c4bdb2;
+    --accent: #b54a32;
+    --accent-muted: #d4a574;
+    --accent-hover: #943c28;
   }
 
   @page {
@@ -34,7 +37,7 @@
   html, body {
     margin: 0;
     padding: 0;
-    background: #e0e0e0; /* Just for preview, prints as white */
+    background: var(--gray-200);
     font-family: "EB Garamond", Georgia, serif;
     color: var(--black);
   }
@@ -46,7 +49,7 @@
     padding: 6mm 8mm; /* Tightened padding */
     background: var(--white);
     border: 3px double var(--black);
-    box-shadow: 0 0 30px rgba(0,0,0,0.15);
+    box-shadow: 0 0 30px rgba(26, 46, 38, 0.12);
     position: relative;
   }
 

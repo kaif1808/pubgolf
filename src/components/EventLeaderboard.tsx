@@ -148,7 +148,10 @@ export default function EventLeaderboard({
             >
               <span className="text-sm text-pg-gray-700">
                 {i + 1}.{" "}
-                <Link className="font-semibold text-pg-black underline" href={`/e/${eventSlug}/t/${r.id}`}>
+                <Link
+                  className="font-semibold text-pg-accent underline decoration-pg-accent-muted underline-offset-2 hover:text-pg-accent-hover"
+                  href={`/e/${eventSlug}/t/${r.id}`}
+                >
                   {r.name}
                 </Link>
               </span>

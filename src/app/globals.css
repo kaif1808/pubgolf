@@ -3,14 +3,18 @@
 @tailwind utilities;
 
 :root {
-  --white: #ffffff;
-  --black: #000000;
-  --gray-100: #f4f4f4;
-  --gray-200: #e0e0e0;
-  --gray-400: #9e9e9e;
-  --gray-700: #424242;
-  --gray-900: #212121;
-  --grid: #bdbdbd;
+  /* Warm pub / Barcelona: cream paper, forest ink, terracotta accent */
+  --white: #faf6f0;
+  --black: #1a2e26;
+  --gray-100: #f0ebe3;
+  --gray-200: #e8ebe4;
+  --gray-400: #9a9288;
+  --gray-700: #4d4540;
+  --gray-900: #2c2825;
+  --grid: #c4bdb2;
+  --accent: #b54a32;
+  --accent-muted: #d4a574;
+  --accent-hover: #943c28;
 }
 
 @page {
@@ -38,13 +42,13 @@ body {
   padding: 6mm 8mm;
   background: var(--white);
   border: 3px double var(--black);
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 0 30px rgba(26, 46, 38, 0.12);
   position: relative;
 }
 
 @media print {
   body {
-    background: white;
+    background: #fff;
   }
   .pg-card {
     box-shadow: none;
@@ -142,6 +146,7 @@ body {
 .pg-table-wrap {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
 }
 
 .pg-table {
@@ -166,6 +171,13 @@ body {
   border: 1px solid var(--black);
 }
 
+.pg-table thead th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  box-shadow: 4px 0 8px rgba(26, 46, 38, 0.12);
+}
+
 .pg-table thead th.pg-bar {
   text-align: left;
   padding-left: 2mm;
@@ -178,6 +190,9 @@ body {
 }
 
 .pg-td-hole {
+  position: sticky;
+  left: 0;
+  z-index: 2;
   text-align: center;
   font-family: var(--font-playfair), "Playfair Display", serif;
   font-weight: 900;
@@ -188,6 +203,7 @@ body {
   padding-top: 2mm;
   border-right: 1px solid var(--black);
   width: 7.5mm;
+  box-shadow: 4px 0 8px rgba(26, 46, 38, 0.08);
 }
 
 .pg-td-bar {
@@ -343,7 +359,8 @@ body {
 
 .pg-shell {
   min-height: 100vh;
-  padding: 1rem;
+  padding: max(1rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+    max(1rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
 }
 
 .pg-btn {
@@ -352,11 +369,17 @@ body {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.5rem 0.85rem;
+  min-height: 2.75rem;
   font-family: var(--font-garamond), Georgia, serif;
   font-size: 0.95rem;
   border: 2px solid var(--black);
   background: var(--white);
   cursor: pointer;
+}
+
+.pg-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .pg-btn:disabled {
@@ -367,9 +390,15 @@ body {
 .pg-input {
   width: 100%;
   padding: 0.45rem 0.5rem;
+  min-height: 2.75rem;
   border: 1px solid var(--black);
   font-family: var(--font-garamond), Georgia, serif;
   font-size: 1rem;
+}
+
+.pg-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
 }
 
 .pg-label {
@@ -379,4 +408,28 @@ body {
   text-transform: uppercase;
   margin-bottom: 0.25rem;
   font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .pg-shell {
+    padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .pg-card {
+    margin: 12px auto;
+    padding: 4mm 5mm;
+  }
+
+  .pg-btn,
+  .pg-input {
+    min-height: 44px;
+  }
+
+  .pg-td-player input {
+    font-size: 16px;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 6px 2px;
+  }
 }

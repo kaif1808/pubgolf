@@ -38,13 +38,15 @@ export default function TeamHubScorecard({ course, team, eventSlug }: Props) {
         <p className="mb-3 text-sm text-pg-gray-700">
           Choose who you are; only that player&apos;s column and penalty tally are editable here.
         </p>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
           {SLOTS.map((s) => (
             <button
               key={s}
               type="button"
-              className={`pg-btn text-sm ${
-                slot === s ? "bg-pg-gray-100" : ""
+              className={`pg-btn w-full text-sm sm:w-auto ${
+                slot === s
+                  ? "border-pg-accent bg-pg-accent-muted/35 text-pg-black ring-1 ring-pg-accent/50"
+                  : ""
               }`}
               onClick={() => setSlot(s)}
             >

@@ -53,7 +53,11 @@ export default function PlayerLinks({ eventSlug, teamId, tokens, labels }: Props
             <li key={r.slot} className="border-b border-dotted border-pg-grid pb-3">
               <div className="mb-1 text-xs font-bold uppercase tracking-widest">{r.label}</div>
               <div className="break-all font-mono text-xs text-pg-gray-700">{url}</div>
-              <button type="button" className="pg-btn mt-2 text-sm" onClick={() => void copy(url, r.label)}>
+              <button
+                type="button"
+                className="pg-btn mt-2 w-full text-sm sm:w-auto"
+                onClick={() => void copy(url, r.label)}
+              >
                 Copy link
               </button>
             </li>

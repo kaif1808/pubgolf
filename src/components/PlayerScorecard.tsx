@@ -269,7 +269,10 @@ export default function PlayerScorecard({
         <div className="no-print mb-3 flex flex-wrap items-center justify-between gap-2 border-b border-pg-black pb-2">
           <p className="text-sm text-pg-gray-700">
             Editing as <strong>{labelForSlot}</strong> · Event{" "}
-            <a className="underline" href={`/e/${eventSlug}`}>
+            <a
+              className="text-pg-accent underline decoration-pg-accent-muted underline-offset-2 hover:text-pg-accent-hover"
+              href={`/e/${eventSlug}`}
+            >
               {eventSlug}
             </a>
           </p>

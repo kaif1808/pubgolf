@@ -2,6 +2,7 @@
 
 ## 2026-04-15
 
+- **Warm theme + mobile**: `:root` in [`globals.css`](src/app/globals.css) uses a warm pub palette (cream paper, forest ink, terracotta `--accent`); Tailwind adds `pg-accent` / `pg-accent-muted` / `pg-accent-hover`. [`layout.tsx`](src/app/layout.tsx) exports `viewport` with `viewportFit: cover` for safe areas; `.pg-shell` uses `env(safe-area-inset-*)`; narrow screens get tighter `.pg-card` padding, 44px min touch targets, and 16px score inputs to avoid iOS zoom. Score table has a sticky first column (`#` / hole). Links and team slot picker use accent styling; [`pubgolf.html`](pubgolf.html) `:root` matches the app.
 - **Supabase `penalty_suggestions`**: If PostgREST reports a missing `penalty_suggestions` column, run [`002_penalty_suggestions.sql`](supabase/migrations/002_penalty_suggestions.sql) in the SQL editor for the **same** project as `NEXT_PUBLIC_SUPABASE_URL`. If the schema cache lags, run `NOTIFY pgrst, 'reload schema';` there (or wait a minute).
 - **Scorecard totals**: Table includes **After par bonus** (`raw − bonus`) between par bonus and penalties; par bonus cells show `0` instead of `−0` when there is no bonus.
 - **Theme**: Shell cards and links use `border-pg-black` / `bg-pg-white` / `text-pg-black` instead of default Tailwind `black`/`white`.

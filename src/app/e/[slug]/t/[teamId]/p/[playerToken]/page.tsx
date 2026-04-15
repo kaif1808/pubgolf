@@ -24,7 +24,10 @@ export default async function PlayerEntryPage({ params }: PageProps) {
   return (
     <div className="pg-shell mx-auto max-w-4xl space-y-6">
       <div className="no-print flex flex-wrap items-center justify-between gap-3">
-        <Link className="text-sm underline" href={`/e/${slug}/t/${teamId}`}>
+        <Link
+          className="text-sm text-pg-accent underline decoration-pg-accent-muted underline-offset-2 hover:text-pg-accent-hover"
+          href={`/e/${slug}/t/${teamId}`}
+        >
           ← Team hub
         </Link>
         <PrintButton />
