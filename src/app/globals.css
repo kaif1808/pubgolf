@@ -1,0 +1,382 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --white: #ffffff;
+  --black: #000000;
+  --gray-100: #f4f4f4;
+  --gray-200: #e0e0e0;
+  --gray-400: #9e9e9e;
+  --gray-700: #424242;
+  --gray-900: #212121;
+  --grid: #bdbdbd;
+}
+
+@page {
+  size: A4 portrait;
+  margin: 5mm;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--gray-200);
+  color: var(--black);
+}
+
+.pg-card {
+  width: min(190mm, 100%);
+  min-height: min(250mm, auto);
+  margin: 20px auto;
+  padding: 6mm 8mm;
+  background: var(--white);
+  border: 3px double var(--black);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+@media print {
+  body {
+    background: white;
+  }
+  .pg-card {
+    box-shadow: none;
+    margin: 0 auto;
+    border: 3px double var(--black);
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+.pg-header {
+  text-align: center;
+  border-bottom: 2px solid var(--black);
+  padding-bottom: 2mm;
+  margin-bottom: 2.5mm;
+  position: relative;
+}
+
+.pg-title {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 900;
+  font-size: clamp(1.25rem, 4vw, 24pt);
+  color: var(--black);
+  line-height: 1;
+  letter-spacing: -0.01em;
+  margin: 0 0 1mm 0;
+}
+
+.pg-subtitle {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(0.85rem, 2.5vw, 11pt);
+  color: var(--gray-700);
+  margin: 0.5mm 0 1.5mm 0;
+}
+
+.pg-course-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px;
+  font-size: 8.5pt;
+  color: var(--gray-700);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  padding: 1mm 4mm 0;
+  font-weight: 500;
+}
+
+.pg-course-meta strong {
+  color: var(--black);
+  font-weight: 700;
+}
+
+.pg-team {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 3.5mm;
+  margin: 2.5mm 0 3mm;
+  padding: 2mm 3.5mm;
+  background: var(--gray-100);
+  border-left: 4px solid var(--black);
+  border-right: 1px solid var(--grid);
+  border-top: 1px solid var(--grid);
+  border-bottom: 1px solid var(--grid);
+}
+
+@media (max-width: 640px) {
+  .pg-team {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.pg-team-field {
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+}
+
+.pg-team-field label {
+  font-size: 7pt;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--black);
+}
+
+.pg-line {
+  border-bottom: 1px solid var(--black);
+  min-height: 4mm;
+}
+
+.pg-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.pg-table {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: 8.5pt;
+  table-layout: fixed;
+  border: 2px solid var(--black);
+}
+
+.pg-table thead th {
+  background: var(--black);
+  color: var(--white);
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 7.5pt;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 1.5mm 1.5mm;
+  text-align: center;
+  border: 1px solid var(--black);
+}
+
+.pg-table thead th.pg-bar {
+  text-align: left;
+  padding-left: 2mm;
+}
+
+.pg-table tbody td {
+  border: 1px solid var(--grid);
+  padding: 1.5mm 2mm;
+  vertical-align: top;
+}
+
+.pg-td-hole {
+  text-align: center;
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 900;
+  font-size: 14pt;
+  color: var(--black);
+  background: var(--gray-100);
+  line-height: 1;
+  padding-top: 2mm;
+  border-right: 1px solid var(--black);
+  width: 7.5mm;
+}
+
+.pg-td-bar {
+  padding-left: 2mm;
+  padding-right: 1.5mm;
+}
+
+.pg-bar-name {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 10.5pt;
+  color: var(--black);
+  line-height: 1.1;
+}
+
+.pg-rule {
+  margin-top: 1mm;
+  padding: 1mm 1.5mm;
+  background: var(--white);
+  color: var(--black);
+  font-family: var(--font-caveat), "Caveat", cursive;
+  font-weight: 700;
+  font-size: 9.5pt;
+  line-height: 1.15;
+  border: 1px dashed var(--gray-700);
+  border-radius: 1mm;
+  display: inline-block;
+}
+
+.pg-rule::before {
+  content: "RULE ";
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 900;
+  font-size: 6pt;
+  letter-spacing: 0.15em;
+  color: var(--gray-900);
+  margin-right: 1.5mm;
+  vertical-align: 1px;
+}
+
+.pg-td-drink {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: 9pt;
+  color: var(--black);
+  text-align: center;
+  padding-top: 2.5mm;
+}
+
+.pg-td-par {
+  text-align: center;
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 900;
+  font-size: 13pt;
+  color: var(--gray-700);
+  padding-top: 1.5mm;
+  width: 8.5mm;
+}
+
+.pg-td-player {
+  background: var(--white);
+  width: 13mm;
+}
+
+.pg-td-player input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: center;
+  font: inherit;
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 12pt;
+  padding: 0;
+}
+
+.pg-td-player input:disabled {
+  color: var(--black);
+  opacity: 0.85;
+}
+
+.pg-total td {
+  background: var(--gray-100);
+  color: var(--black);
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 700;
+  font-size: 8.5pt;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 1.5mm 2mm;
+  text-align: center;
+  border-top: 2px solid var(--black);
+  border-bottom: 1px solid var(--black);
+}
+
+.pg-total .pg-par-total {
+  color: var(--black);
+  font-size: 11.5pt;
+}
+
+.pg-total .pg-label {
+  text-align: right;
+  padding-right: 4mm;
+}
+
+.pg-footer {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 4mm;
+  margin-top: 3mm;
+}
+
+@media (max-width: 720px) {
+  .pg-footer {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pg-panel {
+  border: 1px solid var(--black);
+  padding: 1.5mm 2.5mm;
+  background: var(--white);
+}
+
+.pg-panel h3 {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-weight: 900;
+  font-size: 8.5pt;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin: 0 0 1mm 0;
+  border-bottom: 1px solid var(--gray-400);
+  padding-bottom: 1mm;
+}
+
+.pg-panel ul {
+  margin: 0;
+  padding-left: 4mm;
+  font-size: 8pt;
+  line-height: 1.4;
+}
+
+.pg-panel li {
+  margin-bottom: 0.5mm;
+}
+
+.pg-panel li strong {
+  color: var(--black);
+  font-weight: 900;
+}
+
+.pg-shell {
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+.pg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-garamond), Georgia, serif;
+  font-size: 0.95rem;
+  border: 2px solid var(--black);
+  background: var(--white);
+  cursor: pointer;
+}
+
+.pg-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.pg-input {
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--black);
+  font-family: var(--font-garamond), Georgia, serif;
+  font-size: 1rem;
+}
+
+.pg-label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+}

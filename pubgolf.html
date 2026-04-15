@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barcelona Pub Golf — Scorecard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,700;1,900&family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,700&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Pure B&W / Grayscale Palette for Ink Saving */
+    --white: #ffffff;
+    --black: #000000;
+    --gray-100: #f4f4f4;
+    --gray-200: #e0e0e0;
+    --gray-400: #9e9e9e;
+    --gray-700: #424242;
+    --gray-900: #212121;
+    --grid: #bdbdbd;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 5mm; /* Tightened safe printer margin */
+  }
+
+  * {
+    box-sizing: border-box;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #e0e0e0; /* Just for preview, prints as white */
+    font-family: "EB Garamond", Georgia, serif;
+    color: var(--black);
+  }
+
+  .card {
+    width: 190mm; /* Fits inside A4 width */
+    min-height: 250mm; /* Reduced safe height */
+    margin: 20px auto;
+    padding: 6mm 8mm; /* Tightened padding */
+    background: var(--white);
+    border: 3px double var(--black);
+    box-shadow: 0 0 30px rgba(0,0,0,0.15);
+    position: relative;
+  }
+
+  @media print {
+    html, body { background: white; }
+    .card { box-shadow: none; margin: 0 auto; border: 3px double var(--black); }
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    border-bottom: 2px solid var(--black);
+    padding-bottom: 2mm;
+    margin-bottom: 2.5mm;
+    position: relative;
+  }
+
+  .title {
+    font-family: "Playfair Display", serif;
+    font-weight: 900;
+    font-size: 24pt; /* Reduced size */
+    color: var(--black);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin: 0 0 1mm 0;
+  }
+
+  .subtitle {
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 11pt; /* Reduced size */
+    color: var(--gray-700);
+    margin: 0.5mm 0 1.5mm 0;
+  }
+
+  .course-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 8.5pt;
+    color: var(--gray-700);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    padding: 1mm 4mm 0;
+    font-weight: 500;
+  }
+
+  .course-meta strong { color: var(--black); font-weight: 700; }
+
+  /* Team strip */
+  .team {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 3.5mm;
+    margin: 2.5mm 0 3mm;
+    padding: 2mm 3.5mm;
+    background: var(--gray-100);
+    border-left: 4px solid var(--black);
+    border-right: 1px solid var(--grid);
+    border-top: 1px solid var(--grid);
+    border-bottom: 1px solid var(--grid);
+  }
+
+  .team-field { display: flex; flex-direction: column; gap: 1mm; }
+  .team-field label {
+    font-size: 7pt;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+  }
+  .team-field .line {
+    border-bottom: 1px solid var(--black);
+    height: 4mm;
+  }
+
+  /* Scorecard table */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt; /* Reduced size */
+    table-layout: fixed;
+    border: 2px solid var(--black);
+  }
+
+  thead th {
+    background: var(--black);
+    color: var(--white);
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: 7.5pt;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1.5mm 1.5mm; 
+    text-align: center;
+    border: 1px solid var(--black);
+  }
+
+  thead th.bar { text-align: left; padding-left: 2mm; }
+
+  tbody td {
+    border: 1px solid var(--grid);
+    padding: 1.5mm 2mm; /* Reduced writing room slightly */
+    vertical-align: top;
+  }
+
+  /* Column widths */
+  col.hole    { width: 7.5mm; }
+  col.bar     { width: auto; }
+  col.drink   { width: 25mm; }
+  col.par     { width: 8.5mm; }
+  col.player  { width: 13mm; }
+
+  td.hole {
+    text-align: center;
+    font-family: "Playfair Display", serif;
+    font-weight: 900;
+    font-size: 14pt;
+    color: var(--black);
+    background: var(--gray-100);
+    line-height: 1;
+    padding-top: 2mm;
+    border-right: 1px solid var(--black);
+  }
+
+  td.bar { padding-left: 2mm; padding-right: 1.5mm; }
+  td.bar .bar-name {
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: 10.5pt;
+    color: var(--black);
+    line-height: 1.1;
+  }
+  td.bar .rule {
+    margin-top: 1mm;
+    padding: 1mm 1.5mm;
+    background: var(--white);
+    color: var(--black);
+    font-family: "Caveat", cursive;
+    font-weight: 700;
+    font-size: 9.5pt;
+    line-height: 1.15;
+    border: 1px dashed var(--gray-700);
+    border-radius: 1mm;
+    display: inline-block;
+  }
+  td.bar .rule::before {
+    content: "RULE ";
+    font-family: "Playfair Display", serif;
+    font-weight: 900;
+    font-size: 6pt;
+    letter-spacing: 0.15em;
+    color: var(--gray-900);
+    margin-right: 1.5mm;
+    vertical-align: 1px;
+  }
+
+  td.drink {
+    font-family: "Playfair Display", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 9pt;
+    color: var(--black);
+    text-align: center;
+    padding-top: 2.5mm;
+  }
+
+  td.par {
+    text-align: center;
+    font-family: "Playfair Display", serif;
+    font-weight: 900;
+    font-size: 13pt;
+    color: var(--gray-700);
+    padding-top: 1.5mm;
+  }
+
+  td.player { background: var(--white); }
+
+  /* Total row */
+  tr.total td {
+    background: var(--gray-100);
+    color: var(--black);
+    font-family: "Playfair Display", serif;
+    font-weight: 700;
+    font-size: 8.5pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 1.5mm 2mm;
+    text-align: center;
+    border-top: 2px solid var(--black);
+    border-bottom: 1px solid var(--black);
+  }
+  tr.total td.par-total {
+    color: var(--black);
+    font-size: 11.5pt;
+  }
+  tr.total td.label { text-align: right; padding-right: 4mm; }
+
+  /* Footer panels */
+  .footer {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 4mm;
+    margin-top: 3mm;
+  }
+
+  .panel {
+    border: 1px solid var(--black);
+    padding: 1.5mm 2.5mm;
+    background: var(--white);
+  }
+
+  .panel h3 {
+    font-family: "Playfair Display", serif;
+    font-weight: 900;
+    font-size: 8.5pt;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--black);
+    margin: 0 0 1mm 0;
+    border-bottom: 1px solid var(--gray-400);
+    padding-bottom: 1mm;
+  }
+
+  .panel ul {
+    margin: 0;
+    padding-left: 4mm;
+    font-size: 8pt;
+    line-height: 1.4;
+  }
+
+  .panel li { margin-bottom: 0.5mm; }
+  .panel li strong { color: var(--black); font-weight: 900; }
+
+  .winner-box {
+    margin-top: 1.5mm;
+    text-align: center;
+    border-top: 1px dashed var(--gray-400);
+    padding-top: 1.5mm;
+  }
+  .winner-box label {
+    font-size: 6.5pt;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--black);
+    display: block;
+    margin-bottom: 0.5mm;
+  }
+  .winner-box .line {
+    border-bottom: 1.5px solid var(--black);
+    height: 4mm;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1 class="title">BARCELONA PUB GOLF</h1>
+    <div class="subtitle">— The Bogatell-to-Flaherty's Open —</div>
+    <div class="course-meta">
+      <span>Course Par · <strong>34</strong></span>
+      <span>Holes · <strong>9</strong></span>
+      <span>Distance · <strong>~3.5 km</strong></span>
+    </div>
+  </div>
+
+  <!-- TEAM STRIP -->
+  <div class="team">
+    <div class="team-field">
+      <label>Team Name</label>
+      <div class="line"></div>
+    </div>
+    <div class="team-field">
+      <label>Player 1</label>
+      <div class="line"></div>
+    </div>
+    <div class="team-field">
+      <label>Player 2</label>
+      <div class="line"></div>
+    </div>
+    <div class="team-field">
+      <label>Player 3</label>
+      <div class="line"></div>
+    </div>
+  </div>
+
+  <!-- SCORECARD -->
+  <table>
+    <colgroup>
+      <col class="hole">
+      <col class="bar">
+      <col class="drink">
+      <col class="par">
+      <col class="player">
+      <col class="player">
+      <col class="player">
+    </colgroup>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th class="bar">Bar &amp; Local Rule</th>
+        <th>Par Drink</th>
+        <th>Par</th>
+        <th>P1</th>
+        <th>P2</th>
+        <th>P3</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="hole">1</td>
+        <td class="bar">
+          <div class="bar-name">Nova Icaria Beach</div>
+          <div class="rule">No first names. Surnames or nicknames only.</div>
+        </td>
+        <td class="drink">Caña<br>(beach beer)</td>
+        <td class="par">4</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">2</td>
+        <td class="bar">
+          <div class="bar-name">HIVE Poblenou</div>
+          <div class="rule">No saying anyone's name in the group.</div>
+        </td>
+        <td class="drink">Cocktail</td>
+        <td class="par">4</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">3</td>
+        <td class="bar">
+          <div class="bar-name">La Triunfal</div>
+          <div class="rule">No pointing. Use thumb or open hand.</div>
+        </td>
+        <td class="drink">Caña<br>(beer)</td>
+        <td class="par">3</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">4</td>
+        <td class="bar">
+          <div class="bar-name">Cafè del Born</div>
+          <div class="rule">No pronouns. Names only — no I, you, we, he, she.</div>
+        </td>
+        <td class="drink">Vermut</td>
+        <td class="par">3</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">5</td>
+        <td class="bar">
+          <div class="bar-name">Spritz</div>
+          <div class="rule">Buffalo. Drink with non-dominant hand.</div>
+        </td>
+        <td class="drink">Aperol Spritz</td>
+        <td class="par">4</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">6</td>
+        <td class="bar">
+          <div class="bar-name">Bar Manchester</div>
+          <div class="rule">No swearing. Not even under your breath.</div>
+        </td>
+        <td class="drink">Gin &amp; tonic</td>
+        <td class="par">5</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">7</td>
+        <td class="bar">
+          <div class="bar-name">Bar Sincopa</div>
+          <div class="rule">Thumbmaster. Last to follow the thumb on table drinks.</div>
+        </td>
+        <td class="drink">Shot</td>
+        <td class="par">1</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">8</td>
+        <td class="bar">
+          <div class="bar-name">Bar Oviso</div>
+          <div class="rule">No saying "drink" or "drunk". Find another word.</div>
+        </td>
+        <td class="drink">Mojito</td>
+        <td class="par">4</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr>
+        <td class="hole">9</td>
+        <td class="bar">
+          <div class="bar-name">Flaherty's Irish Pub</div>
+          <div class="rule">Toast &amp; compliment a teammate before each sip.</div>
+        </td>
+        <td class="drink">Pint<br>(Guinness)</td>
+        <td class="par">6</td>
+        <td class="player"></td><td class="player"></td><td class="player"></td>
+      </tr>
+
+      <tr class="total">
+        <td colspan="3" class="label">Course Total</td>
+        <td class="par-total">34</td>
+        <td></td><td></td><td></td>
+      </tr>
+      <tr class="total">
+        <td colspan="3" class="label">+ Penalties</td>
+        <td>—</td>
+        <td></td><td></td><td></td>
+      </tr>
+      <tr class="total">
+        <td colspan="3" class="label">FINAL SCORE</td>
+        <td>—</td>
+        <td></td><td></td><td></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="panel">
+      <h3>How to Score</h3>
+      <ul>
+        <li><strong>1 stroke = 1 gulp.</strong> Lower is better. Finish drink in par or fewer = bonus −1.</li>
+        <li><strong>Each rule breach = +1 stroke penalty.</strong> Caller must witness it.</li>
+        <li><strong>Refusing a hole = +5.</strong> Substituting drink type without group vote = +3.</li>
+        <li><strong>Lowest aggregate team score wins a loaf of Grace's focaccia.</strong></li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>Penalty Tally</h3>
+      <ul style="list-style: none; padding-left: 0; font-size: 8.5pt;">
+        <li>P1: ☐☐☐☐☐ ☐☐☐☐☐</li>
+        <li>P2: ☐☐☐☐☐ ☐☐☐☐☐</li>
+        <li>P3: ☐☐☐☐☐ ☐☐☐☐☐</li>
+      </ul>
+      <div class="winner-box">
+        <label>Focaccia Champion</label>
+        <div class="line"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
